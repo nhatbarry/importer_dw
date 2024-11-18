@@ -1,6 +1,6 @@
-# {My First} Data Warehouse Project
+# My First Data Warehouse Project
 
-Hello! I'm {nhatbarry}, and this is my project to show my data warehouse skills.
+Hello! I'm nhatbarry, and this is my project to show my data warehouse skills.
 
 ## 🎯 Knowledge & techniques that I achieved
 
