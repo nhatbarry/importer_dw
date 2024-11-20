@@ -39,11 +39,22 @@ as
   from fact_sales_order_line__cast_type
 )
 
+, fact_sales_order_line__get_customer_key
+as
+(
+  select 
+    *
+  from fact_sales_order_line__calculated_measure as fact_line
+  left join {{ref('stg_fact_sales_order')}} as fact_header
+  using (sales_order_key)
+)
+
 SELECT 
   sales_order_line_key
   , sales_order_key
   , quantity
   , unit_price
   , product_key
+  , customer_key
   , gross_amount
-FROM fact_sales_order_line__calculated_measure
+FROM fact_sales_order_line__get_customer_key
