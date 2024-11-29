@@ -37,19 +37,33 @@ with
       end as is_on_credit_hold,
       customer_category_key,
       buying_group_key
-    from dim_customer__cast_type
+    from
+      dim_customer__cast_type
+  ),
+  dim_customer__join as (
+    select
+      customer.customer_key,
+      customer.customer_name,
+      customer.is_on_credit_hold,
+      customer.customer_category_key,
+      category.customer_category_name,
+      customer.buying_group_key,
+      buying.buying_group_name
+    from
+      dim_customer__convert_boolean as customer
+      left join {{ref("stg_buying_group")}} buying using (buying_group_key)
+      left join {{ref("stg_customer_category")}} category using (customer_category_key)
+  ),
+  dim_customer__handle_null as (
+    select 
+      customer_key,
+      customer_name,
+      is_on_credit_hold,
+      customer_category_key,
+      coalesce(customer_category_name, 'Invalid') as customer_category_name,
+      buying_group_key,
+      coalesce(buying_group_name, 'Invalid') as buying_group_name
+    from dim_customer__join
   )
-select
-  customer.customer_key,
-  customer.customer_name,
-  customer.is_on_credit_hold,
-  customer.customer_category_key,
-  category.customer_category_name,
-  customer.buying_group_key,
-  buying.buying_group_name
-from
-  dim_customer__convert_boolean as customer
-  left join {{ref("stg_buying_group")}} buying 
-  using (buying_group_key)
-  left join {{ref("stg_customer_category")}} category 
-  using (customer_category_key)
+
+  select * from dim_customer__handle_null

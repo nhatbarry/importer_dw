@@ -26,7 +26,7 @@ with
       dim_product__rename_col
   ),
   dim_product__convert_boolean as (
-    select 
+    select
       product_key,
       product_name,
       brand_name,
@@ -37,16 +37,31 @@ with
         else 'Invalid'
       end as is_chiller_stock,
       supplier_key
-    from dim_product__cast
+    from
+      dim_product__cast
+  ),
+  dim_product__join_supplier as (
+    SELECT
+      product.product_key,
+      product.product_name,
+      product.brand_name,
+      product.supplier_key,
+      product.is_chiller_stock,
+      supplier.supplier_name
+    FROM
+      dim_product__convert_boolean as product
+      left join {{ref("dim_supplier")}} as supplier using (supplier_key)
+  ),
+  dim_product__handle_null as (
+    select
+      product_key,
+      product_name,
+      is_chiller_stock,
+      coalesce(brand_name, 'Undefined') as brand_name,
+      supplier_key,
+      coalesce(supplier_name, 'Invalid') as supplier_name
+    from
+      dim_product__join_supplier
   )
-SELECT
-  product.product_key,
-  product.product_name,
-  product.brand_name,
-  product.supplier_key,
-  product.is_chiller_stock,
-  supplier.supplier_name
-FROM
-  dim_product__convert_boolean as product
-  left join {{ref("dim_supplier")}} as supplier
-  using (supplier_key)
+
+  select * from dim_product__handle_null
